@@ -1,5 +1,7 @@
 // Remote Shop Vac Control Code
 // Modified By DonKJr on 6/6/19
+// Code & design modified from bytesized @ https://www.youtube.com/watch?v=VHgaBxTPEPM
+// https://www.bytesizedengineering.com/projects/shop-vac-auto-switch
 //This code controls a shop vac with the tool that its hose is connected to . 
 //When the TOOL that is plugged into the tool AC socket is turned on ....
 //the SHOP VAC that is plugged into the vacuumn socket turns on after a 1 second delay (reduces surge).
