@@ -2,10 +2,10 @@
 // Modified By DonKJr on 6/6/19
 // Code & design modified from bytesized @ https://www.youtube.com/watch?v=VHgaBxTPEPM
 // https://www.bytesizedengineering.com/projects/shop-vac-auto-switch
-//This code controls a shop vac with the tool that its hose is connected to . 
-//When the TOOL that is plugged into the tool AC socket is turned on ....
-//the SHOP VAC that is plugged into the vacuumn socket turns on after a 1 second delay (reduces surge).
-// When the TOOL is turned off the SHOP VAC turns off after a 2 second delay.
+//This code turns on the shop vac that is connected to a certain CONTROLLING TOOL
+//When the CONTROLLING TOOL that is plugged into the TOOL SOCKET is turned on ....
+//the SHOP VAC that is plugged into the VACUUM SOCKET turns on after a 1 second delay (reduces surge).
+//When the CONTROLLING TOOL is turned off the SHOP VAC turns off after a 2 second delay.
 // This sketch is tuned for an Arduino Nano V3.0 buy at https://amzn.to/2WUfGue
 // A manual on/off overide switch is provided that has the same on-off delays as in the automatic mode
 
@@ -33,12 +33,14 @@
 #define VER 1.3
 //1.3 added debug functions adjusted threshold value up
 // 1.3 Bug: relay turns on when board powers up without serial port plugged in.
+// Bug fixed 5v was connected to VIN which is preregulator. Needs to be connected to 5V pin
 int analogValue = 0; // Stores ADC values read in from the current sensor
 unsigned long stopwatch = 0; // Used to keep track of elapsed time
 boolean relayPinState = HIGH; // Stores the current state of the relay pin
 
 void setup() {
   Serial.begin(115200);
+  pinMode(CURRENT_SENSOR_PIN, INPUT);
   pinMode(RELAY_PIN,OUTPUT);
   pinMode(OVERRIDE_SW_PIN,INPUT_PULLUP);
   digitalWrite(RELAY_PIN, HIGH); // initialize the relay to off
@@ -70,20 +72,22 @@ void loop()
   // If the max ADC value from the tools current sensor exceeds the threshold, set the relay state to LOW
   if(analogValue > CURRENT_THRESHOLD || digitalRead(OVERRIDE_SW_PIN) == LOW ) 
     {
-      #ifdef DEBUG 
-        if(digitalRead(OVERRIDE_SW_PIN) ==LOW)
+      relayPinState=LOW; //set the vacuum relay to ON by changing the state
+      #ifdef DEBUG
+       Serial.println("waiting ON delay ....");
+       if(digitalRead(OVERRIDE_SW_PIN) ==LOW)
           {
             Serial.println("Override SW ON");
           }
-       #endif
-      relayPinState=LOW; //set the vacuum relay to ON by changing the state
-      #ifdef DEBUG 
-        Serial.print("Threshold Exceeded with = ");
-        Serial.println(analogValue);
-        Serial.println("waiting ON delay ....");
-      #endif
+       else
+          {
+          Serial.print("Threshold Exceeded with = ");
+          Serial.println(analogValue);
+          }  
+      #endif       
         delay(RELAY_ON_DELAY);
       #ifdef DEBUG 
+        
         Serial.println("Relay ON");
       #endif
     }
